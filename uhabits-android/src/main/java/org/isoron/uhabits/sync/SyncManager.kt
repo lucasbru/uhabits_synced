@@ -29,6 +29,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
@@ -90,7 +91,7 @@ class SyncManager(
 
     override fun onCommandFinished(command: Command) {
         if (command is SyncChangesAppliedCommand) return
-        if (account.isSignedIn) requestSync(delaySeconds = DEBOUNCE_SECONDS)
+        if (account.isSignedIn) requestSyncSoon()
     }
 
     /** Called when the app comes to the foreground. */
@@ -98,15 +99,28 @@ class SyncManager(
         if (account.isSignedIn) requestSync()
     }
 
-    fun requestSync(delaySeconds: Long = 0) {
-        val request = OneTimeWorkRequestBuilder<SyncWorker>()
+    /** Syncs as soon as possible, unless a sync is already queued or running. */
+    fun requestSync() {
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(WORK_NOW, ExistingWorkPolicy.KEEP, oneTimeRequest(0))
+    }
+
+    /**
+     * Syncs a few seconds after the last local edit. Restarting the timer on
+     * every edit batches quick successions of check-ins into one round. A
+     * sync that is already running is not affected (different unique name).
+     */
+    private fun requestSyncSoon() {
+        WorkManager.getInstance(context)
+            .enqueueUniqueWork(WORK_DEBOUNCED, ExistingWorkPolicy.REPLACE, oneTimeRequest(DEBOUNCE_SECONDS))
+    }
+
+    private fun oneTimeRequest(delaySeconds: Long) =
+        OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(networkConstraint())
             .setInitialDelay(delaySeconds, TimeUnit.SECONDS)
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
             .build()
-        WorkManager.getInstance(context)
-            .enqueueUniqueWork(WORK_ONCE, ExistingWorkPolicy.REPLACE, request)
-    }
 
     private fun schedulePeriodic() {
         val request = PeriodicWorkRequestBuilder<SyncWorker>(PERIODIC_HOURS, TimeUnit.HOURS)
@@ -119,7 +133,8 @@ class SyncManager(
 
     private fun cancelWork() {
         val wm = WorkManager.getInstance(context)
-        wm.cancelUniqueWork(WORK_ONCE)
+        wm.cancelUniqueWork(WORK_NOW)
+        wm.cancelUniqueWork(WORK_DEBOUNCED)
         wm.cancelUniqueWork(WORK_PERIODIC)
     }
 
@@ -132,9 +147,10 @@ class SyncManager(
         try {
             val result = engine.sync()
             if (result.changedHabits.isNotEmpty()) {
-                // Refresh on the main thread: the model objects are shared with the UI.
+                // Reload and recompute in the background (can be slow after a
+                // first full pull), then let listeners refresh the UI.
+                SyncModelRefresher.refresh(habitList, result.changedHabits)
                 withContext(Dispatchers.Main) {
-                    SyncModelRefresher.refresh(habitList, result.changedHabits)
                     commandRunner.notifyListeners(SyncChangesAppliedCommand(result.changedHabits))
                 }
             }
@@ -166,7 +182,9 @@ class SyncManager(
      * Existing local data is merged into the account; where both have a
      * value for the same field, the account's value wins.
      */
-    suspend fun completeSignIn(tokens: AuthTokens) {
+    suspend fun completeSignIn(tokens: AuthTokens) = withContext(NonCancellable) {
+        // NonCancellable: the one-time code is already spent, so finish even
+        // if the screen that started this goes away.
         withContext(Dispatchers.IO) {
             account.saveTokens(tokens)
             account.pendingVerifier = null
@@ -199,7 +217,8 @@ class SyncManager(
 
     companion object {
         private const val TAG = "SyncManager"
-        private const val WORK_ONCE = "loop-sync-once"
+        private const val WORK_NOW = "loop-sync-now"
+        private const val WORK_DEBOUNCED = "loop-sync-debounced"
         private const val WORK_PERIODIC = "loop-sync-periodic"
         private const val DEBOUNCE_SECONDS = 5L
         private const val PERIODIC_HOURS = 6L

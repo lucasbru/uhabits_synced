@@ -441,8 +441,11 @@ class LocalSyncStore(private val db: Database) {
         /** Clock of a value we have no record of writing. Loses to any real write. */
         private val UNKNOWN = Clock(0, "")
 
+        /** The server rejects longer strings; better to truncate than to get stuck. */
+        const val MAX_TEXT = 10_000
+
         internal fun readColumn(stmt: PreparedStatement, index: Int, f: FieldSpec): Any? = when (f.type) {
-            ColumnType.TEXT -> stmt.getTextOrNull(index)
+            ColumnType.TEXT -> stmt.getTextOrNull(index)?.take(MAX_TEXT)
             ColumnType.INT -> stmt.getLongOrNull(index)
             ColumnType.REAL -> stmt.getRealOrNull(index)
         }

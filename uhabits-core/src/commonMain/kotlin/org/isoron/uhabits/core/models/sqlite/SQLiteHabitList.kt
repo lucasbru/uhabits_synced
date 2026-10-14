@@ -43,6 +43,51 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
     private val list: MemoryHabitList = MemoryHabitList()
     private var loaded = false
 
+    /**
+     * The database row each habit object was last loaded from or written to.
+     * [update] compares against it, so that fields the app did not change keep
+     * whatever is in the database now, e.g. values that sync wrote meanwhile.
+     */
+    private val base = HashMap<Long, HabitData>()
+
+    private fun remember(data: HabitData) {
+        data.id?.let { base[it] = data.copy() }
+    }
+
+    /**
+     * Three-way merge of an in-memory habit with the database: fields the app
+     * changed since the object was loaded win, all other fields come from the
+     * database. Without this, an edit made through a stale object would write
+     * old values back and, through the sync triggers, revert remote edits.
+     */
+    private fun mergeWithDatabase(mine: HabitData): HabitData {
+        val id = mine.id ?: return mine
+        val old = base[id] ?: return mine
+        val db = repository.findById(id) ?: return mine
+        if (db == old) return mine
+        fun <T> pick(m: T, o: T, d: T) = if (m != o) m else d
+        return HabitData(
+            id = id,
+            name = pick(mine.name, old.name, db.name),
+            description = pick(mine.description, old.description, db.description),
+            question = pick(mine.question, old.question, db.question),
+            freqNum = pick(mine.freqNum, old.freqNum, db.freqNum),
+            freqDen = pick(mine.freqDen, old.freqDen, db.freqDen),
+            color = pick(mine.color, old.color, db.color),
+            position = pick(mine.position, old.position, db.position),
+            reminderHour = pick(mine.reminderHour, old.reminderHour, db.reminderHour),
+            reminderMin = pick(mine.reminderMin, old.reminderMin, db.reminderMin),
+            reminderDays = pick(mine.reminderDays, old.reminderDays, db.reminderDays),
+            highlight = db.highlight,
+            archived = pick(mine.archived, old.archived, db.archived),
+            type = pick(mine.type, old.type, db.type),
+            targetValue = pick(mine.targetValue, old.targetValue, db.targetValue),
+            targetType = pick(mine.targetType, old.targetType, db.targetType),
+            unit = pick(mine.unit, old.unit, db.unit),
+            uuid = pick(mine.uuid, old.uuid, db.uuid)
+        )
+    }
+
     private fun loadRecords() {
         if (loaded) return
         loaded = true
@@ -53,6 +98,7 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
             if (rec.position != expectedPosition) shouldRebuildOrder = true
             val h = modelFactory.buildHabit()
             copyTo(rec, h)
+            remember(rec)
             (h.originalEntries as SQLiteEntryList).habitId = h.id
             list.add(h)
         }
@@ -67,6 +113,8 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
         val data = copyFrom(habit)
         val id = repository.insert(data)
         habit.id = id
+        data.id = id
+        remember(data)
         (habit.originalEntries as SQLiteEntryList).habitId = id
         list.add(habit)
         observable.notifyListeners()
@@ -131,6 +179,7 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
             if (r.position != pos) {
                 r.position = pos
                 repository.update(r)
+                if (base.containsKey(r.id)) base[r.id!!] = base[r.id]!!.copy(position = pos)
             }
         }
     }
@@ -141,6 +190,7 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
         list.remove(h)
         h.originalEntries.clear()
         repository.delete(h.id!!)
+        base.remove(h.id!!)
         rebuildOrder()
         observable.notifyListeners()
     }
@@ -148,6 +198,7 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
     @Synchronized
     override fun removeAll() {
         list.removeAll()
+        base.clear()
         repository.execSQL("delete from habits")
         repository.execSQL("delete from repetitions")
         observable.notifyListeners()
@@ -170,9 +221,10 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
                     "where position > $fromPos and position <= $toPos"
             )
         }
-        val data = copyFrom(from)
+        val data = mergeWithDatabase(copyFrom(from))
         data.position = toPos
         repository.update(data)
+        remember(data)
         observable.notifyListeners()
     }
 
@@ -194,8 +246,11 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
         loadRecords()
         list.update(habits)
         for (h in habits) {
-            val data = copyFrom(h)
-            repository.update(data)
+            val mine = copyFrom(h)
+            val merged = mergeWithDatabase(mine)
+            repository.update(merged)
+            if (merged != mine) copyTo(merged, h)
+            remember(merged)
         }
         observable.notifyListeners()
     }
@@ -236,6 +291,7 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
             val uuid = rec.uuid ?: continue
             seen.add(uuid)
             val existing = list.getByUUID(uuid)
+            remember(rec)
             if (existing == null) {
                 val h = modelFactory.buildHabit()
                 copyTo(rec, h)

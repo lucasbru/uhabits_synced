@@ -159,8 +159,9 @@ class SyncApi(private val account: SyncAccount) : SyncTransport {
         val json = try {
             call("POST", "/v1/auth/refresh", JSONObject().put("refreshToken", refresh), null)
         } catch (e: ApiException) {
+            // Only a definite "no" ends the session; 5xx or 429 are retried later.
             if (e.status == 401) account.clearSession()
-            throw ApiException(401, e.code, e.message ?: e.code)
+            throw e
         }
         val tokens = parseTokens(json)
         account.saveTokens(tokens)

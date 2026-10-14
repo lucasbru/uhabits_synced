@@ -37,6 +37,15 @@ class HabitRepository(private val db: Database) {
         )
     }
 
+    private val findByIdStmt by lazy {
+        db.prepareStatement(
+            """SELECT id, name, description, question, freq_num, freq_den, color,
+               position, reminder_hour, reminder_min, reminder_days, highlight,
+               archived, type, target_value, target_type, unit, uuid
+               FROM Habits WHERE id = ?"""
+        )
+    }
+
     private val insertStmt by lazy {
         db.prepareStatement(
             """INSERT INTO Habits(name, description, question, freq_num, freq_den,
@@ -75,6 +84,12 @@ class HabitRepository(private val db: Database) {
             results.add(readRow(findAllStmt))
         }
         return results
+    }
+
+    fun findById(id: Long): HabitData? {
+        findByIdStmt.reset()
+        findByIdStmt.bindLong(1, id)
+        return if (findByIdStmt.step() == StepResult.ROW) readRow(findByIdStmt) else null
     }
 
     fun insert(data: HabitData): Long {

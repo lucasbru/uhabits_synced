@@ -29,9 +29,11 @@
         app:popupTheme="?toolbarPopupTheme" />
 
     <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar">
+        android:layout_below="@id/toolbar"
+        android:background="?windowBackgroundColor">
 
         <LinearLayout
             android:layout_width="match_parent"

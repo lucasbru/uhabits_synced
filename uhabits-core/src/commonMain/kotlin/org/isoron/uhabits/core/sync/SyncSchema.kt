@@ -40,8 +40,9 @@ class FieldSpec(
 
 /**
  * Change-tracking schema. Lives in its own tables and triggers instead of a
- * numbered migration, so that the main schema (and therefore backup files)
- * stays identical to upstream Loop. See docs/SYNC.md, section 3.
+ * numbered migration, so the database version stays at upstream's and backup
+ * files still open in upstream Loop (which ignores the extra tables). See
+ * docs/SYNC.md, section 3.
  */
 object SyncSchema {
     /** Bump when trigger definitions change; triggers are then recreated. */

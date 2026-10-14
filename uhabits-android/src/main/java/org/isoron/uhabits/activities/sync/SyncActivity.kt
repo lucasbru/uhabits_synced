@@ -45,6 +45,7 @@ import org.isoron.uhabits.core.sync.SyncException
 import org.isoron.uhabits.databinding.SyncActivityBinding
 import org.isoron.uhabits.sync.SyncApi
 import org.isoron.uhabits.sync.SyncManager
+import org.isoron.uhabits.utils.applyBottomInset
 import org.isoron.uhabits.utils.applyRootViewInsets
 import org.isoron.uhabits.utils.setupToolbar
 import java.io.IOException
@@ -76,6 +77,7 @@ class SyncActivity : AppCompatActivity() {
             theme = themeSwitcher.currentTheme
         )
         binding.root.applyRootViewInsets()
+        binding.scroll.applyBottomInset()
         setContentView(binding.root)
 
         binding.googleButton.setOnClickListener { startOAuth("google") }

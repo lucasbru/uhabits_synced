@@ -351,6 +351,37 @@ class SyncEngineTest {
     }
 
     @Test
+    fun testStaleObjectDoesNotRevertRemoteEdit() = runTest {
+        val server = FakeSyncServer()
+        val a = newDevice(server)
+        val b = newDevice(server)
+        val uuid = a.createHabit("Read").uuid!!
+        a.sync()
+        b.sync()
+        val staleOnB = b.habit(uuid)!!
+
+        val ha = a.habit(uuid)!!
+        ha.name = "Read daily"
+        a.habits.update(ha)
+        a.sync()
+
+        // b pulls the rename, but the in-memory object is not refreshed yet
+        // (e.g. an edit screen is open), and b then archives through it.
+        b.engine.sync()
+        staleOnB.isArchived = true
+        b.habits.update(staleOnB)
+        assertEquals("Read daily", staleOnB.name)
+        b.sync()
+        a.sync()
+
+        for (d in listOf(a, b)) {
+            val h = d.habit(uuid)!!
+            assertEquals("Read daily", h.name)
+            assertTrue(h.isArchived)
+        }
+    }
+
+    @Test
     fun testOwnChangesComingBackAreNoOps() = runTest {
         val server = FakeSyncServer()
         val a = newDevice(server)
