@@ -119,6 +119,17 @@
             android:title="@string/database">
 
         <Preference
+                android:key="sync"
+                android:summary="@string/sync_pref_summary"
+                android:title="@string/sync_title"
+                app:iconSpaceReserved="false">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="org.isoron.uhabits.activities.sync.SyncActivity"
+                android:targetPackage="org.isoron.uhabits" />
+        </Preference>
+
+        <Preference
                 android:key="exportDB"
                 android:summary="@string/export_full_backup_summary"
                 android:title="@string/export_full_backup"
@@ -198,27 +209,6 @@
                 android:key="pref_developer"
                 android:title="Enable developer mode"
                 app:iconSpaceReserved="false" />
-
-        <EditTextPreference
-            android:defaultValue="@string/syncBaseURL"
-            android:key="pref_sync_base_url"
-            android:title="Sync server"
-            app:iconSpaceReserved="false"
-            />
-
-        <EditTextPreference
-            android:defaultValue=""
-            android:key="pref_sync_key"
-            android:title="Sync key"
-            app:iconSpaceReserved="false"
-            />
-
-        <EditTextPreference
-            android:defaultValue=""
-            android:key="pref_encryption_key"
-            android:title="Encryption key"
-            app:iconSpaceReserved="false"
-            />
 
     </PreferenceCategory>
 

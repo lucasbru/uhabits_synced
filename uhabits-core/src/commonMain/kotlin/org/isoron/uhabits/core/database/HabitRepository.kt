@@ -33,7 +33,7 @@ class HabitRepository(private val db: Database) {
             """SELECT id, name, description, question, freq_num, freq_den, color,
                position, reminder_hour, reminder_min, reminder_days, highlight,
                archived, type, target_value, target_type, unit, uuid
-               FROM Habits ORDER BY position"""
+               FROM Habits ORDER BY position, uuid"""
         )
     }
 

@@ -54,15 +54,13 @@ class SQLiteEntryList(val repository: EntryRepository) : EntryList() {
         loadRecords()
         val habitId = habitId ?: throw IllegalStateException("habitId must be set")
 
-        repository.deleteByHabitIdAndTimestamp(habitId, entry.date.unixTime)
-
         val data = EntryData(
             habitId = habitId,
             timestamp = entry.date.unixTime,
             value = entry.value,
             notes = entry.notes
         )
-        repository.insert(data)
+        repository.upsert(data)
 
         super.add(entry)
     }
@@ -74,6 +72,15 @@ class SQLiteEntryList(val repository: EntryRepository) : EntryList() {
 
     override fun recomputeFrom(originalEntries: EntryList, frequency: Frequency, isNumerical: Boolean) {
         throw UnsupportedOperationException()
+    }
+
+    /**
+     * Drops the in-memory copy, so that entries are reloaded from the
+     * database on next access. Used after sync changed the database.
+     */
+    fun invalidate() {
+        super.clear()
+        isLoaded = false
     }
 
     override fun clear() {

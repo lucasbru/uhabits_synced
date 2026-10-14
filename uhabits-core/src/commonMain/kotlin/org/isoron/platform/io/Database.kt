@@ -77,6 +77,10 @@ fun Database.commit() {
     run("COMMIT")
 }
 
+fun Database.rollback() {
+    run("ROLLBACK")
+}
+
 inline fun Database.query(
     sql: String,
     vararg params: String,

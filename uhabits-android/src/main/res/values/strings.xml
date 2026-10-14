@@ -238,4 +238,38 @@
     <string name="pref_midnight_delay_description">Wait until 3:00 AM to show a new day. Useful if you typically go to sleep after midnight. Requires app restart.</string>
     <string name="pref_animations_title">Disable animations</string>
     <string name="pref_animations_description">Disable confetti animation after adding a checkmark.</string>
+
+    <!-- Cloud sync -->
+    <string name="sync_title">Cloud sync</string>
+    <string name="sync_pref_summary">Keep your habits in sync across devices</string>
+    <string name="sync_intro">Sign in to back up your habits and keep them in sync across your devices. Loop keeps working offline; changes are sent whenever you are connected.</string>
+    <string name="sync_continue_google">Continue with Google</string>
+    <string name="sync_continue_github">Continue with GitHub</string>
+    <string name="sync_continue_microsoft">Continue with Microsoft</string>
+    <string name="sync_or_email">Or sign in with your email address, no password needed:</string>
+    <string name="sync_email_hint">Email address</string>
+    <string name="sync_email_send">Email me a sign-in link</string>
+    <string name="sync_code_sent">We sent an email to %1$s. Tap the link in it on this device, or type the 6-digit code here.</string>
+    <string name="sync_code_hint">6-digit code</string>
+    <string name="sync_code_verify">Sign in</string>
+    <string name="sync_signed_in_as">Signed in as %1$s</string>
+    <string name="sync_signed_in">Signed in</string>
+    <string name="sync_last_synced">Last synced: %1$s</string>
+    <string name="sync_never_synced">Not synced yet</string>
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_sign_out">Sign out</string>
+    <string name="sync_delete_account">Delete account</string>
+    <string name="sync_delete_confirm">This permanently deletes your account and all habits stored on the server. Habits on this device are kept. Continue?</string>
+    <string name="sync_server_title">Sync server</string>
+    <string name="sync_server_hint">https://sync.example.org</string>
+    <string name="sync_server_save">Save server</string>
+    <string name="sync_server_missing">Enter the address of a sync server below to sign in.</string>
+    <string name="sync_error_network">Could not reach the sync server. Loop will try again when you are online.</string>
+    <string name="sync_error_server">The sync server had a problem. Loop will try again later.</string>
+    <string name="sync_error_clock">Sync failed because this device\'s clock is wrong. Please check the date and time settings.</string>
+    <string name="sync_error_signed_out">Your session has expired. Please sign in again.</string>
+    <string name="sync_error_generic">Something went wrong: %1$s</string>
+    <string name="sync_error_invalid_email">Please enter a valid email address.</string>
+    <string name="sync_error_code">That code is not valid. Check the email and try again.</string>
 </resources>

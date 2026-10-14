@@ -51,6 +51,7 @@ import org.isoron.uhabits.io.AndroidLogging
 import org.isoron.uhabits.notifications.AndroidNotificationTray
 import org.isoron.uhabits.preferences.SharedPreferencesStorage
 import org.isoron.uhabits.receivers.ReminderController
+import org.isoron.uhabits.sync.SyncManager
 import org.isoron.uhabits.utils.DatabaseUtils
 import org.isoron.uhabits.widgets.WidgetUpdater
 import java.io.File
@@ -79,6 +80,7 @@ abstract class HabitsApplicationComponent(
     abstract val preferences: Preferences
     abstract val reminderScheduler: ReminderScheduler
     abstract val reminderController: ReminderController
+    abstract val syncManager: SyncManager
     abstract val taskRunner: TaskRunner
     abstract val widgetPreferences: WidgetPreferences
     abstract val widgetUpdater: WidgetUpdater

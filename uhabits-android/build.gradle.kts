@@ -57,6 +57,11 @@ android {
         targetSdk = 36
         applicationId = "org.isoron.uhabits"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Default cloud sync server. Override with -PloopSyncServerUrl=https://…
+        // or leave empty and let users enter one in the app.
+        val syncServerUrl = (project.findProperty("loopSyncServerUrl") as String?) ?: ""
+        buildConfigField("String", "SYNC_SERVER_URL", "\"$syncServerUrl\"")
     }
 
     signingConfigs {
@@ -125,6 +130,8 @@ dependencies {
     implementation(libs.documentfile)
     implementation(libs.opencsv)
     implementation(libs.konfetti.xml)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.browser)
     implementation(project(":uhabits-core"))
     ksp(libs.kotlin.inject.compiler)
 

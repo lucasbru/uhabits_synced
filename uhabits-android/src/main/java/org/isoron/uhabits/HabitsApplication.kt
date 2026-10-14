@@ -65,6 +65,10 @@ class HabitsApplication : Application() {
             dbFile = db
         )
 
+        // Change tracking must be in place before anything writes to the database.
+        val syncManager = component.syncManager
+        syncManager.ensureSchema()
+
         val prefs = component.preferences
         prefs.lastAppVersion = BuildConfig.VERSION_CODE
 
@@ -83,6 +87,8 @@ class HabitsApplication : Application() {
 
         notificationTray = component.notificationTray
         notificationTray.startListening()
+
+        syncManager.start()
 
         val taskRunner = component.taskRunner
         taskRunner.execute {

@@ -30,6 +30,8 @@ shadow = "8.1.1"
 sqliteJdbc = "3.45.1.0"
 uiautomator = "2.3.0"
 documentfile = "1.0.1"
+work = "2.10.1"
+browser = "1.8.0"
 
 [libraries]
 annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
@@ -69,6 +71,9 @@ rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }
 uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 [plugins]
 agp = { id = "com.android.application", version.ref = "agp" }

@@ -26,6 +26,19 @@ class EntryRepository(private val db: Database) {
         )
     }
 
+    private val insertOrIgnoreStmt by lazy {
+        db.prepareStatement(
+            "INSERT OR IGNORE INTO Repetitions(habit, timestamp, value, notes) VALUES (?, ?, ?, ?)"
+        )
+    }
+
+    private val updateValueStmt by lazy {
+        db.prepareStatement(
+            "UPDATE Repetitions SET value = ?, notes = ? WHERE habit = ? AND timestamp = ? " +
+                "AND (value IS NOT ? OR notes IS NOT ?)"
+        )
+    }
+
     private val deleteByHabitAndTimestampStmt by lazy {
         db.prepareStatement("DELETE FROM Repetitions WHERE habit = ? AND timestamp = ?")
     }
@@ -60,6 +73,29 @@ class EntryRepository(private val db: Database) {
         insertStmt.bindText(4, data.notes)
         insertStmt.step()
         return db.queryLong("SELECT last_insert_rowid()")
+    }
+
+    /**
+     * Inserts the entry, or updates it in place if one already exists for the
+     * same habit and timestamp. Unlike delete + insert, this lets the sync
+     * triggers see which fields actually changed.
+     */
+    fun upsert(data: EntryData) {
+        insertOrIgnoreStmt.reset()
+        insertOrIgnoreStmt.bindLong(1, data.habitId!!)
+        insertOrIgnoreStmt.bindLong(2, data.timestamp)
+        insertOrIgnoreStmt.bindInt(3, data.value)
+        insertOrIgnoreStmt.bindText(4, data.notes)
+        insertOrIgnoreStmt.step()
+
+        updateValueStmt.reset()
+        updateValueStmt.bindInt(1, data.value)
+        updateValueStmt.bindText(2, data.notes)
+        updateValueStmt.bindLong(3, data.habitId!!)
+        updateValueStmt.bindLong(4, data.timestamp)
+        updateValueStmt.bindInt(5, data.value)
+        updateValueStmt.bindText(6, data.notes)
+        updateValueStmt.step()
     }
 
     fun deleteByHabitIdAndTimestamp(habitId: Long, timestamp: Long) {

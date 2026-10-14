@@ -210,6 +210,52 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
         loaded = false
     }
 
+    /**
+     * Brings the in-memory habits up to date with the database after it was
+     * changed underneath us (by sync). Existing [Habit] objects are updated in
+     * place, so screens holding a reference keep working; new rows become new
+     * habits and missing rows are dropped.
+     *
+     * @return the habits that were added or updated. Callers should
+     * invalidate their entries (if needed) and recompute them.
+     */
+    @Synchronized
+    fun refreshFromDatabase(): List<Habit> {
+        if (!loaded) {
+            loadRecords()
+            return list.toList()
+        }
+        var records = repository.findAll()
+        if (records.withIndex().any { (i, r) -> r.position != i }) {
+            rebuildOrder()
+            records = repository.findAll()
+        }
+        val seen = HashSet<String>()
+        val touched = mutableListOf<Habit>()
+        for (rec in records) {
+            val uuid = rec.uuid ?: continue
+            seen.add(uuid)
+            val existing = list.getByUUID(uuid)
+            if (existing == null) {
+                val h = modelFactory.buildHabit()
+                copyTo(rec, h)
+                (h.originalEntries as SQLiteEntryList).habitId = h.id
+                list.add(h)
+                touched.add(h)
+            } else {
+                copyTo(rec, existing)
+                (existing.originalEntries as SQLiteEntryList).habitId = existing.id
+                touched.add(existing)
+            }
+        }
+        for (h in list.toList()) {
+            if (h.uuid !in seen) list.remove(h)
+        }
+        list.resort()
+        observable.notifyListeners()
+        return touched
+    }
+
     companion object {
         fun copyFrom(habit: Habit): HabitData {
             val (numerator, denominator) = habit.frequency
@@ -249,12 +295,14 @@ class SQLiteHabitList(private val modelFactory: ModelFactory) : HabitList() {
             habit.unit = data.unit
             habit.position = data.position
             habit.uuid = data.uuid
-            if (data.reminderHour != null && data.reminderMin != null) {
-                habit.reminder = Reminder(
+            habit.reminder = if (data.reminderHour != null && data.reminderMin != null) {
+                Reminder(
                     data.reminderHour!!,
                     data.reminderMin!!,
                     WeekdayList(data.reminderDays)
                 )
+            } else {
+                null
             }
         }
     }
