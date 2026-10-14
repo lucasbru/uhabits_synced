@@ -107,6 +107,13 @@ class SyncActivity : AppCompatActivity() {
         handleDeepLink(intent)
     }
 
+    // The declared parent (SettingsActivity) isn't reliably below this singleTask
+    // activity, so the toolbar arrow did nothing. Go back like the system button.
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+
     override fun onResume() {
         super.onResume()
         render()

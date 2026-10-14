@@ -244,6 +244,13 @@
         <item name="android:background">@drawable/ripple_transparent</item>
     </style>
 
+    <!-- colorPrimary is the near-black toolbar color, which made Material buttons
+         unreadable on the dark theme. Use the accent instead. -->
+    <style name="SyncScreenOverlay" parent="">
+        <item name="colorPrimary">?aboutScreenColor</item>
+        <item name="colorOnPrimary">?attr/contrast0</item>
+    </style>
+
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
