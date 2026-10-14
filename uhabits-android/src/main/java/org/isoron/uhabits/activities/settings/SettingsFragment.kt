@@ -189,7 +189,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
             Log.d("SettingsFragment", "updating widgets")
             widgetUpdater!!.updateWidgets()
         }
-        BackupManager.dataChanged("org.isoron.uhabits")
+        BackupManager.dataChanged(requireContext().packageName)
         updateWeekdayPreference()
     }
 

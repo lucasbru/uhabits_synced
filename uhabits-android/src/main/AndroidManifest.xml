@@ -123,14 +123,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.settings.SettingsActivity" />
-            <!-- Sign-in redirect from the sync server (OAuth and email links). -->
+            <!-- Sign-in redirect from the sync server (OAuth and email links).
+                 Must match SyncApi.REDIRECT_SCHEME. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="auth"
-                    android:scheme="org.isoron.uhabits.sync" />
+                    android:scheme="${applicationId}.sync" />
             </intent-filter>
         </activity>
 
@@ -301,7 +302,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="org.isoron.uhabits"
+            android:authorities="${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

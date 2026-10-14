@@ -54,7 +54,7 @@ import java.io.IOException
  * Account screen for cloud sync: sign in (OAuth providers or email), see the
  * sync status, sign out, delete the account, and choose the server.
  *
- * Also receives the sign-in deep link: org.isoron.uhabits.sync://auth?code=…
+ * Also receives the sign-in deep link: SyncApi.REDIRECT_URI?code=…
  */
 class SyncActivity : AppCompatActivity() {
     private lateinit var binding: SyncActivityBinding
@@ -267,7 +267,7 @@ class SyncActivity : AppCompatActivity() {
 
     private fun handleDeepLink(intent: Intent?) {
         val data: Uri = intent?.data ?: return
-        if (data.scheme != "org.isoron.uhabits.sync") return
+        if (data.scheme != SyncApi.REDIRECT_SCHEME) return
         intent.data = null // handle once
         val error = data.getQueryParameter("error")
         if (error != null) {

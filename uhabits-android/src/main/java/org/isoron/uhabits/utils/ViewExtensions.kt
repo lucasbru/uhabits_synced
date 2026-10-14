@@ -124,7 +124,7 @@ fun Activity.showSendFileScreen(archiveFilename: String) {
         uri
     } else {
         val file = if (uri.scheme == "file") File(uri.path!!) else File(archiveFilename)
-        FileProvider.getUriForFile(this, "org.isoron.uhabits", file)
+        FileProvider.getUriForFile(this, packageName, file)
     }
     this.startActivitySafely(
         Intent().apply {

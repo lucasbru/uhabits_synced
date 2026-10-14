@@ -22,6 +22,7 @@ import android.net.Uri
 import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.isoron.uhabits.BuildConfig
 import org.isoron.uhabits.core.sync.FieldValue
 import org.isoron.uhabits.core.sync.SyncException
 import org.isoron.uhabits.core.sync.SyncRecord
@@ -222,7 +223,10 @@ class SyncApi(private val account: SyncAccount) : SyncTransport {
     }
 
     companion object {
-        const val REDIRECT_URI = "org.isoron.uhabits.sync://auth"
+        // org.isoron.uhabits.sync in release, org.isoron.uhabits.sync.sync in debug
+        // (applicationIdSuffix). Must match the intent filter in AndroidManifest.xml.
+        const val REDIRECT_SCHEME = BuildConfig.APPLICATION_ID + ".sync"
+        const val REDIRECT_URI = "$REDIRECT_SCHEME://auth"
         private const val USER_AGENT = "LoopHabitTracker-Android"
 
         fun encodeRequest(r: SyncRequest): JSONObject {

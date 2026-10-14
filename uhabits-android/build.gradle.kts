@@ -56,6 +56,8 @@ android {
         minSdk = 28
         targetSdk = 36
         applicationId = "org.isoron.uhabits"
+        // For XML that can't use ${applicationId} (preferences.xml intents).
+        resValue("string", "application_id", "org.isoron.uhabits")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Default cloud sync server. Override with -PloopSyncServerUrl=https://…
@@ -86,6 +88,10 @@ android {
 
         debug {
             enableUnitTestCoverage = true
+            // Installable next to the Play Store app (org.isoron.uhabits). The sign-in
+            // deep-link scheme follows, as ${applicationId}.sync (see AndroidManifest.xml).
+            applicationIdSuffix = ".sync"
+            resValue("string", "application_id", "org.isoron.uhabits.sync")
         }
     }
 

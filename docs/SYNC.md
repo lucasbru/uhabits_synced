@@ -161,6 +161,8 @@ user to fix the device clock. Network and `5xx` errors → retry with backoff.
 There are no passwords. The server runs every login flow itself; the app only opens a browser tab (Custom Tabs,
 from the FOSS `androidx.browser` library) and receives the result through the deep link
 `org.isoron.uhabits.sync://auth`. This keeps Google Play Services and other proprietary SDKs out of the app.
+The scheme is `${applicationId}.sync`, so the debug build (application ID `org.isoron.uhabits.sync`, installable next
+to the Play Store app) uses `org.isoron.uhabits.sync.sync://auth`; the server's `APP_REDIRECT_URIS` must list both.
 
 ```
 app                                    server                                    provider
