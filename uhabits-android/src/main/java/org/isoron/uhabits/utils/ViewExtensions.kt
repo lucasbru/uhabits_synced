@@ -194,6 +194,12 @@ fun View.setupToolbar(
     activity.window.statusBarColor = toolbarColor
     activity.setSupportActionBar(toolbar)
     activity.supportActionBar?.setDisplayHomeAsUpEnabled(displayHomeAsUpEnabled)
+    // Up via the PARENT_ACTIVITY meta-data did nothing on recent Android versions.
+    // Behave like the system back button instead (set after setSupportActionBar,
+    // which installs its own listener).
+    if (displayHomeAsUpEnabled) {
+        toolbar.setNavigationOnClickListener { activity.onBackPressedDispatcher.onBackPressed() }
+    }
 }
 
 fun View.currentTheme(): Theme {
