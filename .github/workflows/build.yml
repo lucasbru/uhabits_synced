@@ -11,14 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Run core JVM tests
-        run: ./gradlew --no-daemon :uhabits-core:jvmTest
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon :uhabits-core:jvmTest 2>&1 | tee build.log
+      - name: Report errors
+        if: failure()
+        run: .github/scripts/report-errors.sh build.log
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
@@ -31,14 +36,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Assemble debug APK and run unit tests
-        run: ./gradlew --no-daemon :uhabits-android:assembleDebug :uhabits-android:testDebugUnitTest
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon :uhabits-android:assembleDebug :uhabits-android:testDebugUnitTest 2>&1 | tee build.log
+      - name: Report errors
+        if: failure()
+        run: .github/scripts/report-errors.sh build.log
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
