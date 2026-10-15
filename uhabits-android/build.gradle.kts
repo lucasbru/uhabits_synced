@@ -60,7 +60,8 @@ android {
         resValue("string", "application_id", "org.isoron.uhabits")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Default cloud sync server. Override with -PloopSyncServerUrl=https://…
+        // Cloud sync server, fixed at build time (the app has no setting for it).
+        // Override with -PloopSyncServerUrl=https://… for a self-hosted server.
         // or leave empty and let users enter one in the app.
         val syncServerUrl = (project.findProperty("loopSyncServerUrl") as String?) ?: ""
         buildConfigField("String", "SYNC_SERVER_URL", "\"$syncServerUrl\"")

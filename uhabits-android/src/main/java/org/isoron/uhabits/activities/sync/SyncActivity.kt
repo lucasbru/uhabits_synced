@@ -52,7 +52,7 @@ import java.io.IOException
 
 /**
  * Account screen for cloud sync: sign in (OAuth providers or email), see the
- * sync status, sign out, delete the account, and choose the server.
+ * sync status, sign out and delete the account. The server is fixed at build time.
  *
  * Also receives the sign-in deep link: SyncApi.REDIRECT_URI?code=…
  */
@@ -88,12 +88,6 @@ class SyncActivity : AppCompatActivity() {
         binding.syncNowButton.setOnClickListener { syncNow() }
         binding.signOutButton.setOnClickListener { launchAction { manager.signOut() } }
         binding.deleteAccountButton.setOnClickListener { confirmDelete() }
-        binding.serverSaveButton.setOnClickListener {
-            manager.account.serverUrl = binding.serverInput.text.toString()
-            loadProviders()
-            render()
-        }
-        binding.serverInput.setText(manager.account.serverUrl)
 
         scope.launch {
             manager.running.combine(manager.changes) { _, _ -> }.collect { render() }

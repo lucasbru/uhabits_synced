@@ -36,10 +36,8 @@ class SyncAccount(@AppContext context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("sync_account", Context.MODE_PRIVATE)
 
-    /** Server base URL, without trailing slash. Empty when not configured. */
-    var serverUrl: String
-        get() = (prefs.getString(KEY_SERVER, null) ?: BuildConfig.SYNC_SERVER_URL).trimEnd('/')
-        set(value) = prefs.edit().putString(KEY_SERVER, value.trim().trimEnd('/')).apply()
+    /** Server base URL from the build, without trailing slash. Empty when not configured. */
+    val serverUrl: String = BuildConfig.SYNC_SERVER_URL.trimEnd('/')
 
     val isConfigured: Boolean get() = serverUrl.startsWith("https://") || serverUrl.startsWith("http://")
 
@@ -116,7 +114,6 @@ class SyncAccount(@AppContext context: Context) {
     }
 
     companion object {
-        private const val KEY_SERVER = "server_url"
         private const val KEY_ACCOUNT_ID = "account_id"
         private const val KEY_LAST_ACCOUNT_ID = "last_account_id"
         private const val KEY_EMAIL = "email"

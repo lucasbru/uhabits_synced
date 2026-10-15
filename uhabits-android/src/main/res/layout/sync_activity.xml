@@ -190,29 +190,6 @@
                 android:layout_marginTop="8dp"
                 android:textColor="#D32F2F"
                 android:visibility="gone" />
-
-            <!-- Server, for self-hosting -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="@string/sync_server_title"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/serverInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/sync_server_hint"
-                android:importantForAutofill="no"
-                android:inputType="textUri" />
-
-            <Button
-                android:id="@+id/serverSaveButton"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sync_server_save" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

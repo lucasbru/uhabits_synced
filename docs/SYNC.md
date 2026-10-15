@@ -195,8 +195,8 @@ app                                    server                                   
 * **Account deletion:** `DELETE /v1/account` removes all records, identities and sessions. Google Play requires
   this.
 
-In the app, the account screen is *Settings → Cloud sync*. The server URL defaults to the build property
-`loopSyncServerUrl` and can be changed on that screen, which helps self-hosters.
+In the app, the account screen is *Settings → Cloud sync*. The server URL is fixed at build time: the build
+property `loopSyncServerUrl`, defaulting to the deployed Cloud Run service. Self-hosters build with their own URL.
 
 ## 6. Backend
 
