@@ -43,6 +43,9 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Assemble debug APK and run unit tests
+        env:
+          # Repository variable, so the server address stays out of the repo.
+          ORG_GRADLE_PROJECT_loopSyncServerUrl: ${{ vars.LOOP_SYNC_SERVER_URL }}
         run: |
           set -o pipefail
           ./gradlew --no-daemon :uhabits-android:assembleDebug :uhabits-android:testDebugUnitTest 2>&1 | tee build.log

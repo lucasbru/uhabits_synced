@@ -2,8 +2,7 @@
 
 This fork adds optional, account-based sync to Loop Habit Tracker. The app keeps working fully offline. Every
 change is written to the local SQLite database first, and a background job reconciles it with the server whenever
-a network connection is available. The server lives in a separate repository,
-[`lucasbru/uhabits_backend`](https://github.com/lucasbru/uhabits_backend).
+a network connection is available. The server is a separate project and not part of this repository.
 
 ## 1. Goals
 
@@ -162,7 +161,7 @@ There are no passwords. The server runs every login flow itself; the app only op
 from the FOSS `androidx.browser` library) and receives the result through the deep link
 `org.isoron.uhabits.sync://auth`. This keeps Google Play Services and other proprietary SDKs out of the app.
 The scheme is `${applicationId}.sync`, so the debug build (application ID `org.isoron.uhabits.sync`, installable next
-to the Play Store app) uses `org.isoron.uhabits.sync.sync://auth`; the server's `APP_REDIRECT_URIS` must list both.
+to the Play Store app) uses `org.isoron.uhabits.sync.sync://auth`; the server must accept both.
 
 ```
 app                                    server                                    provider
@@ -195,18 +194,14 @@ app                                    server                                   
 * **Account deletion:** `DELETE /v1/account` removes all records, identities and sessions. Google Play requires
   this.
 
-In the app, the account screen is *Settings → Cloud sync*. The server URL is fixed at build time: the build
-property `loopSyncServerUrl`, defaulting to the deployed Cloud Run service. Self-hosters build with their own URL.
+In the app, the account screen is *Settings → Cloud sync*. The server URL is fixed at build time through
+the Gradle property `loopSyncServerUrl`, which is not stored in this repository: put it in
+`~/.gradle/gradle.properties` or pass `-PloopSyncServerUrl=https://…`. CI reads it from the repository variable
+`LOOP_SYNC_SERVER_URL`. Without it, the account screen says that no server is configured.
 
 ## 6. Backend
 
-See the backend README for the API, configuration and deployment. In short:
-
-* Kotlin + Ktor 3, packaged as a container;
-* storage behind a `Store` interface: `FirestoreStore` (Google Cloud), `SqlStore` (PostgreSQL or SQLite, for
-  self-hosting) and `MemoryStore` (tests);
-* recommended hosting: **Cloud Run + Firestore**, which costs nothing while idle and stays within the free tiers
-  for personal use.
+The app depends only on the HTTP API described above; the server implementation is not part of this repository.
 
 ## 7. Limits
 

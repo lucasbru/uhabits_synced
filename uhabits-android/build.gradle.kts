@@ -61,8 +61,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Cloud sync server, fixed at build time (the app has no setting for it).
-        // Override with -PloopSyncServerUrl=https://… for a self-hosted server.
-        // or leave empty and let users enter one in the app.
+        // Not in the repo: set loopSyncServerUrl=https://… in ~/.gradle/gradle.properties
+        // or pass -PloopSyncServerUrl=…. Without it, sync shows as not configured.
         val syncServerUrl = (project.findProperty("loopSyncServerUrl") as String?) ?: ""
         buildConfigField("String", "SYNC_SERVER_URL", "\"$syncServerUrl\"")
     }
